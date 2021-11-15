@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    package:
+      - nginx    
+  tasks:
+    - name: install packages in ubuntu
+      apt: 
+        name: "{{ item }}"
+        state: present
+      loop: "{{ package }}"
+      notify: 
+        - restart nginx
+      when: ansible_os_family == "Debian"
+    - name: Create test.page folder
+      file: 
+        path: /var/www/html/test.page
+        mode: 0755 
+        state: directory
+      when: ansible_os_family == "Debian"
+    - name : copy index.html in /var/www/html/test.page
+      copy:
+        src: index.html
+        dest: /var/www/html/test.page/index.html
+      when: ansible_os_family == "Debian"
+    - name : copy test.page.conf in /etc/nginx/sites-available/
+      copy:
+        src: test.page.conf
+        dest: /etc/nginx/sites-available/test.page.conf
+      when: ansible_os_family == "Debian"
+    - name: congfig test.app.conf
+      shell: |
+        ln -s /etc/nginx/sites-available/test.page.conf /etc/nginx/sites-enabled/test.page.conf
+        nginx -t
+      notify: 
+        - restart nginx
+      when: ansible_os_family == "Debian" 
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true 
