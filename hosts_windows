@@ -1,0 +1,8 @@
+windows_servers]
+xxx.xx.xx.xxx
+
+[all:vars]
+ansible_user=Administrator
+ansible_password='****'
+anshible_connection=ssh
+ansible_shell_type=cmd
